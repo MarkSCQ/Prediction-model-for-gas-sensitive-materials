@@ -7,7 +7,9 @@ wo3_renaming = {
     "二甲苯": "xylene",
     "甲醛": "formaldehyde",
     "汽油": "gasoline",
-    "柴油": "diesel_fuel"
+    "柴油": "diesel_fuel",
+    "H2":"h2",
+    "CH4":"ch4"
 }
 
 metal_ox_wo3 = "wo3"
@@ -132,16 +134,44 @@ def make_dataset_header():
     return curr_header
 
 
+def sheet_dataset(df):
+    dataset=[]
+    elements= list(df.head())
+    print(elements)
+    for row in range(len(df)):
+        # print(raw_gas_exp.iloc[[row]])
+        data = list(df.iloc[row])
+        # print(data)
+        # print(tmp)
+        tmp = data[0:5]
+        for col in range(5, len(data)):
+            tmp.append(elements[col])
+
+            tmp.append(data[col])
+            dataset.append(tmp)
+            tmp = data[0:5]    
+    print(dataset[:3])
+    return dataset
 def make_dataset(dfs):
     print("dfs size  ",len(dfs))
-    for d in dfs:
-        print(dfs[d][:5])
 
     ds_header = make_dataset_header()
-    print(ds_header)
-    df = pd.DataFrame([], columns =['metal_ox', 'gas_cate','temperature','density','resp_density','metal','resp_val']) 
-    print(df)
-
+    dataset = []
+    for d in dfs:
+        sub_set = sheet_dataset(dfs[d])
+        print(len(sub_set))
+        dataset+=sub_set
+    print(len(dataset))
+    print(dataset[:4])
+    df = pd.DataFrame(dataset, columns =['metal_ox', 'gas_cate','temperature','density','resp_density','metal','resp_val']) 
+    print(df[:10])
+    df.to_csv("dataset.csv",index=False)
+    # for i in dataset:
+    #     print(i)
+    # print(ds_header)
+    # print(df)
+    # t = dfs['benzene'].copy()
+    # sheet_dataset(t)
 # read dataframes
 # def readXlsx(path, renaming_dict, gas, metal):
 
@@ -150,4 +180,4 @@ dataframes = read_process("./files_未调整格式/WO3.xlsx", wo3_renaming,metal
 make_dataset(dataframes)
 # dataframes
 # df_add_elements()
-make_dataset_header()
+# make_dataset_header()
