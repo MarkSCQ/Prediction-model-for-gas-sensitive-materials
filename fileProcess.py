@@ -18,6 +18,7 @@ metal_ox_wo3 = "wo3"
 # 汽油 gasoline
 # 柴油 diesel fuel
 
+# header=[]
 
 def translate_column(df,headnames):
 
@@ -116,19 +117,37 @@ def read_process(path, renaming_dict, metal):
             df_add_elements(curr_df, new_name, metal)
 
             dataframes[new_name] = curr_df
+            global header
+            header = list(curr_df.head())
+            # print(header)
+            
     return dataframes
+
+
+
+def make_dataset_header():
+    curr_header = header[:5]
+    curr_header.insert(2,"element")
+    curr_header.append("resp_val")
+    return curr_header
 
 
 def make_dataset(dfs):
     print("dfs size  ",len(dfs))
     for d in dfs:
         print(dfs[d][:5])
-    pass
+
+    ds_header = make_dataset_header()
+    print(ds_header)
+    df = pd.DataFrame([], columns =['metal_ox', 'gas_cate','temperature','density','resp_density','metal','resp_val']) 
+    print(df)
 
 # read dataframes
 # def readXlsx(path, renaming_dict, gas, metal):
 
 dataframes = read_process("./files_未调整格式/WO3.xlsx", wo3_renaming,metal_ox_wo3)
+
 make_dataset(dataframes)
 # dataframes
 # df_add_elements()
+make_dataset_header()
