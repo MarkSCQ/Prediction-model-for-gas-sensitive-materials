@@ -40,6 +40,9 @@ def columns_reshape(df):
     df = df.drop(['density_temp'], axis=1)
     df['gas_density'] = df['gas_density'].apply(lambda x:x[:-3])
 
+    df['density']=df['density'].apply(lambda x:x[:-3])
+    df['temperature']=df['temperature'].apply(lambda x:x[:-1])
+
     header = df.columns.tolist()
     header.insert(0, header[-1])
     header.insert(0, header[-2])
@@ -88,7 +91,7 @@ def renaming_title(df):
     curr_df_header = list(df.head())
 
 
-def readXlsx(path, renaming_dict, metal):
+def read_process(path, renaming_dict, metal):
 
     SheetNameDF = {}
 
@@ -103,39 +106,29 @@ def readXlsx(path, renaming_dict, metal):
             new_name = wo3_renaming[k]
             curr_df = pd.read_excel(path, sheet_name=k)
             
-            # print(list(curr_df.head()))
             curr_head = list(curr_df.head())
-            # print(curr_df)
-            # renameChineseElemenets(curr_df)
-            
             
             translated = translate_column(curr_df,curr_head)
-            # print(translated)
             curr_df.columns = translated
-            
             
             fill_blanks_df(curr_df, 0)
             curr_df=columns_reshape(curr_df)
             df_add_elements(curr_df, new_name, metal)
 
-            print(curr_df)
-
-            # translated = translate_column(curr_df,curr_head)
-            # # print(translated)
-            # curr_df.columns = translated
-            # df_add_elements(curr_df, new_name, metal)
-
-            # dataframes[new_name] = curr_df
-            # print(curr_df)
-
-
+            dataframes[new_name] = curr_df
     return dataframes
 
+
+def make_dataset(dfs):
+    print("dfs size  ",len(dfs))
+    for d in dfs:
+        print(dfs[d][:5])
+    pass
 
 # read dataframes
 # def readXlsx(path, renaming_dict, gas, metal):
 
-dataframes = readXlsx("./files_未调整格式/WO3.xlsx", wo3_renaming,metal_ox_wo3)
-
+dataframes = read_process("./files_未调整格式/WO3.xlsx", wo3_renaming,metal_ox_wo3)
+make_dataset(dataframes)
 # dataframes
 # df_add_elements()
