@@ -158,7 +158,7 @@ def sheet_dataset(df):
 def make_dataset(dfs):
     print("dfs size  ", len(dfs))
 
-    ds_header = make_dataset_header()
+    # ds_header = make_dataset_header()
     dataset = []
     for d in dfs:
         sub_set = sheet_dataset(dfs[d])
@@ -168,16 +168,12 @@ def make_dataset(dfs):
     print(dataset[:4])
     df = pd.DataFrame(dataset, columns=[
                       'metal_ox', 'gas_cate', 'temperature', 'density', 'resp_density', 'metal', 'resp_val'])
+    # df["resp_density"] = pd.to_numeric(df["resp_density"])
+    df['resp_density'] = df['resp_density'].str.rstrip('%').astype('float') / 100.0
+
     print(df[:10])
-    df.to_csv("dataset.csv", index=False)
-    # for i in dataset:
-    #     print(i)
-    # print(ds_header)
-    # print(df)
-    # t = dfs['benzene'].copy()
-    # sheet_dataset(t)
-# read dataframes
-# def readXlsx(path, renaming_dict, gas, metal):
+    df.to_csv("dataset_wo3.csv", index=False)
+
 
 
 dataframes = read_process("./files_未调整格式/WO3.xlsx", wo3_renaming, metal_ox_wo3)
