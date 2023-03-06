@@ -9,7 +9,8 @@ wo3_renaming = {
     "汽油": "gasoline",
     "柴油": "diesel_fuel",
     "H2": "h2",
-    "CH4": "ch4"
+    "CH4": "ch4",
+    "WO3":"wo3"
 }
 
 metal_ox_wo3 = "wo3"
@@ -45,9 +46,12 @@ def columns_reshape(df):
     df[['density', 'temperature']] = df.density_temp.str.split(
         ",", expand=True)
     df = df.drop(['density_temp'], axis=1)
-    df['gas_density'] = df['gas_density'].apply(lambda x: x[:-3])
+    
+    
+    # df['gas_density'] = df['gas_density'].apply(lambda x: x[:-3])
 
     df['density'] = df['density'].apply(lambda x: x[:-3])
+
     df['temperature'] = df['temperature'].apply(lambda x: x[:-1])
 
     header = df.columns.tolist()
@@ -59,6 +63,12 @@ def columns_reshape(df):
     return df
     # return target
 
+
+
+def drop_zero_gas_density(df):
+    # df.drop(df[df['Fee'] >= 24000].index, inplace = True)
+    df.drop(df[df['gas_density'] == 0].index, inplace = True)    
+    
 
 def fill_blanks_df(df, col):
     curr_val = 0
@@ -99,6 +109,12 @@ def renaming_title(df):
     curr_df_header = list(df.head())
 
 
+def round_resp_val(df, filed="WO3", precision=1):
+    print(df)
+    # print(df["resp_val"])
+    df[filed] = df[filed].round(precision)
+
+
 def read_process(path, renaming_dict, metal):
 
     SheetNameDF = {}
@@ -111,23 +127,30 @@ def read_process(path, renaming_dict, metal):
 
     for k in sheetnames:
         if k in wo3_renaming:
+            # renaming wo3 
             new_name = wo3_renaming[k]
+            # read from excel file 
             curr_df = pd.read_excel(path, sheet_name=k)
-
+            # get current header list
             curr_head = list(curr_df.head())
-
+            # translate chi to eng
             translated = translate_column(curr_df, curr_head)
+            # renaming header
             curr_df.columns = translated
-
+            # fill nan blanks
             fill_blanks_df(curr_df, 0)
-            curr_df = columns_reshape(curr_df)
+            # reshape the dataframes
+            curr_df = columns_reshape(curr_df)  
+            # remove rows when gas_density=0
+            drop_zero_gas_density(curr_df)
+            # add elements
             df_add_elements(curr_df, new_name, metal)
-
+            # collect data
             dataframes[new_name] = curr_df
             global header
             header = list(curr_df.head())
-            # print(header)
-
+            # round values
+            round_resp_val(curr_df)
     return dataframes
 
 
@@ -169,15 +192,15 @@ def make_dataset(dfs):
     df = pd.DataFrame(dataset, columns=[
                       'metal_ox', 'gas_cate', 'temperature', 'density', 'resp_density', 'metal', 'resp_val'])
     # df["resp_density"] = pd.to_numeric(df["resp_density"])
-    df['resp_density'] = df['resp_density'].str.rstrip('%').astype('float') / 100.0
+    # df['resp_density'] = df['resp_density'].str.rstrip('%').astype('float') / 100.0
 
     print(df[:10])
+
     df.to_csv("dataset_wo3.csv", index=False)
 
 
 
-dataframes = read_process("./files_未调整格式/WO3.xlsx", wo3_renaming, metal_ox_wo3)
-
+dataframes = read_process("../raw_data/wo3_mod.xlsx", wo3_renaming, metal_ox_wo3)
 make_dataset(dataframes)
 # dataframes
 # df_add_elements()
